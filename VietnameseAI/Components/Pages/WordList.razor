@@ -1,0 +1,44 @@
+﻿@inject UserLearningDatabase userLearningDatabase
+@page "/wordList"
+
+<h1>Word List</h1>
+
+<p>Words you've discovered</p>
+
+@if (discoveredWords == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Word</th>
+				<th>Definition</th>
+				<th>Times Seen</th>
+				<th>Added</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var word in discoveredWords)
+			{
+				<tr>
+					<td>@word.Word</td>
+					<td>@word.Definition</td>
+					<td>@word.TimesDiscovered</td>
+					<td>@word.DiscoveredDate</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+@code {
+	private List<DiscoveredWord>? discoveredWords;
+
+	protected override async Task OnInitializedAsync()
+	{
+		discoveredWords = await userLearningDatabase.GetDiscoveredWordsAsync();
+	}
+}
