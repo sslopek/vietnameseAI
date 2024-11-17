@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using VietnameseAI.Data;
 
 namespace VietnameseAI
 {
@@ -20,6 +21,8 @@ namespace VietnameseAI
 			builder.Services.AddBlazorWebViewDeveloperTools();
 			builder.Logging.AddDebug();
 #endif
+
+			builder.Services.AddSingleton<UserLearningDatabase>();
 
 			return builder.Build();
 		}
