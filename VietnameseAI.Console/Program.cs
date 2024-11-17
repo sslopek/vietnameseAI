@@ -1,7 +1,9 @@
 ﻿using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
-using System.Text.Encodings.Web;
 using System.Text.Json;
+
+#pragma warning disable SKEXP0010 // OpenAIPromptExecutionSettings ResponseFormat is for evaluation purposes only and is subject to change or removal in future updates.
 
 namespace VietnameseAI.ConsoleApp;
 
@@ -27,15 +29,25 @@ internal class Program
 				)
 			.Build();
 
-#pragma warning disable SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+		var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+
+		// Create a history to store the conversation
+		var history = new ChatHistory();
+
 		var executionSettings = new OpenAIPromptExecutionSettings
 		{
 			// Structured output - https://openai.com/index/introducing-structured-outputs-in-the-api/
 			ResponseFormat = typeof(ChatResponseModel),
 			// Prompt - Location affects dialect. Gender and age of participants are important for kinship terms.
-			ChatSystemPrompt = "Assistant is acting as a native Vietnamese speaker living in Southern Vietnam.  It is an older colleague of the user.  The user is male."
+			ChatSystemPrompt = """
+				You are a Vietnamese language coach that helps users learn and practice Vietnamese.
+				Engage the user in conversations to help them improve their language skill.
+				If the user asks questions about you, make up an interesting and specific response.
+				You are a native Vietnamese speaker living in Southern Vietnam.  You are an older than the user.  The user is male.
+				The output word lists should include every word from the response or message in lowercase without any grammatical marks, keeping sets of words like "Việt Nam" together and respecting capitalization rules.
+			"""
 		};
-#pragma warning restore SKEXP0010
+
 
 		while (true)
 		{
@@ -48,19 +60,28 @@ internal class Program
 				break;
 			}
 
-			var response = await kernel.InvokePromptAsync(userInput, new(executionSettings));
+			history.AddUserMessage(userInput);
+
+			var response = await chatCompletionService.GetChatMessageContentAsync(
+				 history,
+				 executionSettings: executionSettings,
+				 kernel: kernel);
 
 			// Deserialize string response
 			var responseModel = JsonSerializer.Deserialize<ChatResponseModel>(response.ToString())!;
-			// Serialize again for easy viewing on console
-			var prettyPrinted = JsonSerializer.Serialize(responseModel, new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping })!;
 
-			Console.WriteLine("AI: " + responseModel.ChatReplyVietnamese);
+			Console.WriteLine("AI: " + responseModel.AssistantResponseInVietnamese);
 			Console.ForegroundColor = ConsoleColor.DarkGray;
-			Console.WriteLine("AI (English): " + responseModel.ChatReplyEnglish);
+			Console.WriteLine("AI (English): " + responseModel.AssistantResponseInEnglish);
 			Console.WriteLine();
-			Console.WriteLine(prettyPrinted);
+			foreach (var item in responseModel.AssistantResponseVietnameseWordList.Union(responseModel.UserMessageVietnameseWordList).OrderBy(x => x.VietnameseWord))
+			{
+				Console.WriteLine($"{item.VietnameseWord}: {item.EnglishTranslation}");
+			}
 			Console.ResetColor();
+
+			// Keep track of just the English version
+			history.AddAssistantMessage(responseModel.AssistantResponseInEnglish);
 		}
 
 	}
