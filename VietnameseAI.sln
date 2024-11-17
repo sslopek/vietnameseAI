@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35506.116 d17.12
+VisualStudioVersion = 17.12.35506.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VietnameseAI", "VietnameseAI\VietnameseAI.csproj", "{9928C603-1C1D-4504-A1CE-54BCD8D70773}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VietnameseAI.ConsoleApp", "VietnameseAI.Console\VietnameseAI.ConsoleApp.csproj", "{ACE3F177-92F5-4B17-B16A-778E6EB0F392}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{9928C603-1C1D-4504-A1CE-54BCD8D70773}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9928C603-1C1D-4504-A1CE-54BCD8D70773}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9928C603-1C1D-4504-A1CE-54BCD8D70773}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACE3F177-92F5-4B17-B16A-778E6EB0F392}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACE3F177-92F5-4B17-B16A-778E6EB0F392}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACE3F177-92F5-4B17-B16A-778E6EB0F392}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACE3F177-92F5-4B17-B16A-778E6EB0F392}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
