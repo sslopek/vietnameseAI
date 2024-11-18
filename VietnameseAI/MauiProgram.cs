@@ -40,6 +40,9 @@ namespace VietnameseAI
 
 			builder.Services.AddTransient<Kernel>(serviceProvider =>
 			{
+				// Use preferences screen value if set, then environment variable if not
+				var openaiKey = Preferences.Default.Get("openai_key", apiKey);
+
 				var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
 				var httpClient = httpClientFactory.CreateClient("OpenAIChatCompletionHttpClient");
 
@@ -47,7 +50,7 @@ namespace VietnameseAI
 				Kernel kernel = Kernel.CreateBuilder()
 					.AddOpenAIChatCompletion(
 						modelId: "gpt-4o-2024-08-06",
-						apiKey: apiKey,
+						apiKey: openaiKey,
 						httpClient: httpClient
 						)
 					.Build();

@@ -1,0 +1,16 @@
+@page "/preferences"
+
+<h3>Preferences</h3>
+
+<div>
+    OpenAI Key:
+    <br/>
+    <textarea @bind="apiKey" rows="4" cols="50" placeholder="Enter your OpenAI key"></textarea>
+    <br />
+    <button @onclick="SaveKey">Save</button>
+</div>
+
+@code {
+    private string apiKey = Microsoft.Maui.Storage.Preferences.Default.Get("openai_key", string.Empty);
+    private void SaveKey() => Microsoft.Maui.Storage.Preferences.Default.Set("openai_key", apiKey);
+}
