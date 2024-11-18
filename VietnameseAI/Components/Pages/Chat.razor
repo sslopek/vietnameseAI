@@ -1,0 +1,59 @@
+﻿@page "/chat"
+
+<h1>Chat</h1>
+
+<div class="chat-container">
+	<div class="message-list">
+		@foreach (var message in messages)
+		{
+			<div class="message">
+				<div class="@(message.IsUser ? "user-message" : "assistant-message")">
+					<p class="message-body">@message.Text</p>
+				</div>
+			</div>
+		}
+	</div>
+	<div class="input-container">
+		<input @bind="userInput" @onkeypress="HandleKeyPress" placeholder="Type your message..." />
+		<button @onclick="SendMessage">Send</button>
+	</div>
+</div>
+
+@code {
+	private string userInput = string.Empty;
+	private List<Message> messages = new List<Message>();
+
+	private async Task SendMessage()
+	{
+		if (!string.IsNullOrWhiteSpace(userInput))
+		{
+			// Add user message to the chat
+			messages.Add(new Message { Text = userInput, IsUser = true });
+			var lastMessage = userInput;
+			userInput = string.Empty;
+
+			var assistantResponse = await GetResponse(lastMessage);
+			messages.Add(new Message { Text = assistantResponse, IsUser = false });
+		}
+	}
+
+	private async Task<string> GetResponse(string message)
+	{
+		await Task.Delay(500);
+		return $"You typed '{message}'";
+	}
+
+	private async Task HandleKeyPress(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+		{
+			await SendMessage();
+		}
+	}
+
+	public class Message
+	{
+		public string Text { get; set; } = string.Empty;
+		public bool IsUser { get; set; }
+	}
+}
