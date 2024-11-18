@@ -2,6 +2,7 @@
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System.Text.Json;
+using VietnameseAI.Shared.Data;
 using VietnameseAI.Shared.Models;
 
 #pragma warning disable SKEXP0010 // OpenAIPromptExecutionSettings ResponseFormat is for evaluation purposes only and is subject to change or removal in future updates.
@@ -11,15 +12,16 @@ namespace VietnameseAI.Shared.Services;
 public class LanguageChatService
 {
 	private readonly Kernel kernel;
-
+	private readonly UserLearningDatabase userLearningDatabase;
 	private readonly IChatCompletionService chatCompletionService;
 	private readonly OpenAIPromptExecutionSettings openAIPromptExecutionSettings;
 	// History to store the conversation
 	readonly private ChatHistory history = [];
 
-	public LanguageChatService(Kernel kernel)
+	public LanguageChatService(Kernel kernel, UserLearningDatabase userLearningDatabase)
 	{
 		this.kernel = kernel;
+		this.userLearningDatabase = userLearningDatabase;
 		chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
 		openAIPromptExecutionSettings = new OpenAIPromptExecutionSettings
@@ -52,6 +54,27 @@ public class LanguageChatService
 		// Keep track of just the English version
 		history.AddAssistantMessage(responseModel.AssistantResponseInEnglish);
 
+		// Save new words
+		foreach (var item in responseModel.AssistantResponseVietnameseWordList.Union(responseModel.UserMessageVietnameseWordList).OrderBy(x => x.VietnameseWord))
+		{
+			var wordRecord = await userLearningDatabase.GetItemAsync(item.VietnameseWord);
+
+			if (wordRecord == null)
+			{
+				wordRecord = new DiscoveredWord
+				{
+					Word = item.VietnameseWord,
+					Definition = item.EnglishTranslation
+				};
+			}
+			else {
+				wordRecord.TimesDiscovered += 1;
+				wordRecord.LastSeenDate = DateTime.Now;
+			}
+
+			await userLearningDatabase.SaveItemAsync(wordRecord);
+		}
+		
 		return responseModel;
 	}
 }

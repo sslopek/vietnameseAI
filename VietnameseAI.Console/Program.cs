@@ -1,4 +1,6 @@
 ﻿using Microsoft.SemanticKernel;
+using VietnameseAI.Shared.Data;
+using VietnameseAI.Shared.Models;
 using VietnameseAI.Shared.Services;
 
 namespace VietnameseAI.ConsoleApp;
@@ -25,7 +27,10 @@ internal class Program
 				)
 			.Build();
 
-		var chatService = new LanguageChatService(kernel);
+		var sqlitePreferences = new SQLitePreferences();
+		sqlitePreferences.DatabasePath = Path.Combine(sqlitePreferences.DatabasePath, sqlitePreferences.DatabaseFilename);
+		var userLearningDatabase = new UserLearningDatabase(sqlitePreferences);
+		var chatService = new LanguageChatService(kernel, userLearningDatabase);
 
 		while (true)
 		{
