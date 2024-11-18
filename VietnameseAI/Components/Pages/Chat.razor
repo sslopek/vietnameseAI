@@ -3,13 +3,22 @@
 
 <h1>Chat</h1>
 
+<p>Practice conversations with AI. Type in English or Vietnamese.</p>
+
 <div class="chat-container">
 	<div class="message-list">
 		@foreach (var message in messages)
 		{
 			<div class="message">
 				<div class="@(message.IsUser ? "user-message" : "assistant-message")">
-					<p class="message-body">@message.Text</p>
+					<p class="message-body">
+						@message.Text
+						@if (@message.Translation != null)
+						{
+							<div class="translated-spoiler">@message.Translation</div>
+						}
+					</p>
+
 				</div>
 			</div>
 		}
@@ -34,14 +43,17 @@
 			userInput = string.Empty;
 
 			var assistantResponse = await GetResponse(lastMessage);
-			messages.Add(new Message { Text = assistantResponse, IsUser = false });
+			messages.Add(new Message { 
+				Text = assistantResponse.AssistantResponseInVietnamese,
+				Translation = assistantResponse.AssistantResponseInEnglish,
+				IsUser = false 
+			});
 		}
 	}
 
-	private async Task<string> GetResponse(string message)
+	private async Task<ChatResponseModel> GetResponse(string message)
 	{
-		var response = await languageChatService.SendMessage(message);
-		return response.AssistantResponseInVietnamese;
+		return await languageChatService.SendMessage(message);
 	}
 
 	private async Task HandleKeyPress(KeyboardEventArgs e)
@@ -55,6 +67,7 @@
 	public class Message
 	{
 		public string Text { get; set; } = string.Empty;
+		public string? Translation { get; set; }
 		public bool IsUser { get; set; }
 	}
 }

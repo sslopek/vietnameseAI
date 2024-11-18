@@ -35,6 +35,17 @@
         background-color: #e3effd !important;
     }
 
+.translated-spoiler {
+    font-size: 80%;
+    color: gray;
+    filter: blur(3px);
+}
+
+    .translated-spoiler:hover {
+        color: black;
+        filter: none;
+    }
+
 .input-container {
     display: flex;
 }
@@ -50,7 +61,7 @@ button {
     padding: 8px;
     margin-left: 5px;
     border: none;
-    background-color: #007bff;
+    background-color: #c22f2f;
     color: white;
     border-radius: 5px;
     cursor: pointer;
