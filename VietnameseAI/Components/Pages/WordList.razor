@@ -18,6 +18,7 @@ else
 				<th>Definition</th>
 				<th>Times Seen</th>
 				<th>Added</th>
+				<th>Actions</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -28,6 +29,7 @@ else
 					<td>@word.Definition</td>
 					<td>@word.TimesDiscovered</td>
 					<td>@word.DiscoveredDate</td>
+					<td><button @onclick="@(e => HandleDelete(word))">Delete</button></td>
 				</tr>
 			}
 		</tbody>
@@ -38,6 +40,17 @@ else
 	private List<DiscoveredWord>? discoveredWords;
 
 	protected override async Task OnInitializedAsync()
+	{
+		await ReloadList();
+	}
+
+	private async Task HandleDelete(DiscoveredWord word)
+	{
+		userLearningDatabase.DeleteItemAsync(word);
+		await ReloadList();
+	}
+
+	private async Task ReloadList()
 	{
 		discoveredWords = await userLearningDatabase.GetDiscoveredWordsAsync();
 	}
