@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace VietnameseAI.Models;
+namespace VietnameseAI.Shared.Models;
 
 public class DiscoveredWord
 {

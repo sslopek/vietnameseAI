@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
-using VietnameseAI.Data;
+using Microsoft.SemanticKernel;
+using VietnameseAI.Shared.Data;
+using VietnameseAI.Shared.Models;
+using VietnameseAI.Shared.Services;
 
 namespace VietnameseAI
 {
@@ -7,6 +10,8 @@ namespace VietnameseAI
 	{
 		public static MauiApp CreateMauiApp()
 		{
+			var apiKey = Environment.GetEnvironmentVariable("OpenAI__ApiKey__VietnameseAI") ?? "no-key";
+
 			var builder = MauiApp.CreateBuilder();
 			builder
 				.UseMauiApp<App>()
@@ -22,7 +27,35 @@ namespace VietnameseAI
 			builder.Logging.AddDebug();
 #endif
 
-			builder.Services.AddSingleton<UserLearningDatabase>();
+			// SQLite database
+			var sqlitePreferences = new SQLitePreferences();
+			sqlitePreferences.DatabasePath = Path.Combine(FileSystem.AppDataDirectory, sqlitePreferences.DatabaseFilename);
+
+			// fix for "SSL handshake aborted" on Android in Semantic Kernel
+			var httpClientHandlerCertCheckSkip = new HttpClientHandler
+			{
+				CheckCertificateRevocationList = false,
+			};
+			builder.Services.AddHttpClient("OpenAIChatCompletionHttpClient").ConfigurePrimaryHttpMessageHandler(() => httpClientHandlerCertCheckSkip);
+
+			builder.Services.AddTransient<Kernel>(serviceProvider =>
+			{
+				var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+				var httpClient = httpClientFactory.CreateClient("OpenAIChatCompletionHttpClient");
+
+				// Initialize kernel.
+				Kernel kernel = Kernel.CreateBuilder()
+					.AddOpenAIChatCompletion(
+						modelId: "gpt-4o-2024-08-06",
+						apiKey: apiKey,
+						httpClient: httpClient
+						)
+					.Build();
+				return kernel;
+			});
+			builder.Services.AddSingleton<LanguageChatService>();
+			builder.Services.AddTransient<UserLearningDatabase>();
+			builder.Services.AddSingleton<SQLitePreferences>(sqlitePreferences);
 
 			return builder.Build();
 		}

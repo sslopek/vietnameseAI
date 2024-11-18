@@ -1,9 +1,5 @@
 ﻿using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-using System.Text.Json;
-
-#pragma warning disable SKEXP0010 // OpenAIPromptExecutionSettings ResponseFormat is for evaluation purposes only and is subject to change or removal in future updates.
+using VietnameseAI.Shared.Services;
 
 namespace VietnameseAI.ConsoleApp;
 
@@ -29,25 +25,7 @@ internal class Program
 				)
 			.Build();
 
-		var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
-
-		// Create a history to store the conversation
-		var history = new ChatHistory();
-
-		var executionSettings = new OpenAIPromptExecutionSettings
-		{
-			// Structured output - https://openai.com/index/introducing-structured-outputs-in-the-api/
-			ResponseFormat = typeof(ChatResponseModel),
-			// Prompt - Location affects dialect. Gender and age of participants are important for kinship terms.
-			ChatSystemPrompt = """
-				You are a Vietnamese language coach that helps users learn and practice Vietnamese.
-				Engage the user in conversations to help them improve their language skill.
-				If the user asks questions about you, make up an interesting and specific response.
-				You are a native Vietnamese speaker living in Southern Vietnam.  You are an older than the user.  The user is male.
-				The output word lists should include every word from the response or message in lowercase without any grammatical marks, keeping sets of words like "Việt Nam" together and respecting capitalization rules.
-			"""
-		};
-
+		var chatService = new LanguageChatService(kernel);
 
 		while (true)
 		{
@@ -60,15 +38,7 @@ internal class Program
 				break;
 			}
 
-			history.AddUserMessage(userInput);
-
-			var response = await chatCompletionService.GetChatMessageContentAsync(
-				 history,
-				 executionSettings: executionSettings,
-				 kernel: kernel);
-
-			// Deserialize string response
-			var responseModel = JsonSerializer.Deserialize<ChatResponseModel>(response.ToString())!;
+			var responseModel = await chatService.SendMessage(userInput);
 
 			Console.WriteLine("AI: " + responseModel.AssistantResponseInVietnamese);
 			Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -79,10 +49,6 @@ internal class Program
 				Console.WriteLine($"{item.VietnameseWord}: {item.EnglishTranslation}");
 			}
 			Console.ResetColor();
-
-			// Keep track of just the English version
-			history.AddAssistantMessage(responseModel.AssistantResponseInEnglish);
 		}
-
 	}
 }

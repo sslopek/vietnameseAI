@@ -1,21 +1,26 @@
 ﻿using SQLite;
-using VietnameseAI.Models;
+using VietnameseAI.Shared.Models;
 
-namespace VietnameseAI.Data;
+namespace VietnameseAI.Shared.Data;
 
 public class UserLearningDatabase
 {
-	SQLiteAsyncConnection Database;
-	public UserLearningDatabase()
+	private readonly SQLiteAsyncConnection Database;
+	private bool initialized = false;
+
+	public UserLearningDatabase(SQLitePreferences sqlitePreferences)
 	{
+		Database = new SQLiteAsyncConnection(sqlitePreferences.DatabasePath, sqlitePreferences.Flags);
 	}
 
 	async Task Init()
 	{
-		if (Database is not null)
+		if (initialized)
+		{
 			return;
+		}
+		initialized = true;
 
-		Database = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
 		var result = await Database.CreateTableAsync<DiscoveredWord>();
 
 		// Initial data
