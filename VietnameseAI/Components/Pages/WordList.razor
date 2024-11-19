@@ -46,7 +46,7 @@ else
 
 	private async Task HandleDelete(DiscoveredWord word)
 	{
-		userLearningDatabase.DeleteItemAsync(word);
+		await userLearningDatabase.DeleteItemAsync(word);
 		await ReloadList();
 	}
 
