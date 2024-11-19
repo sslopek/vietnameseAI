@@ -24,36 +24,46 @@
 		}
 	</div>
 	<form @onsubmit="HandleSubmit" class="input-container">
-		<input @bind="userInput" placeholder="Type your message..." />
-		<button type="submit">Send</button>
+		<input @bind="userInput" placeholder="Type your message..." disabled="@isProcessing" />
+		<button type="submit">
+			@if (!isProcessing)
+			{
+				@("Send")
+			}
+			else
+			{
+				<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+				<span class="visually-hidden" role="status">Loading...</span>
+			}
+		</button>
 	</form>
 </div>
 
 @code {
 	private string userInput = string.Empty;
+	private bool isProcessing;
 	private List<Message> messages = new List<Message>();
 
 	private async Task HandleSubmit()
 	{
 		if (!string.IsNullOrWhiteSpace(userInput))
 		{
+			isProcessing = true;
+
 			// Add user message to the chat
 			messages.Add(new Message { Text = userInput, IsUser = true });
 			var lastMessage = userInput;
 			userInput = string.Empty;
 
-			var assistantResponse = await GetResponse(lastMessage);
+			var assistantResponse = await languageChatService.SendMessage(lastMessage);
 			messages.Add(new Message { 
 				Text = assistantResponse.AssistantResponseInVietnamese,
 				Translation = assistantResponse.AssistantResponseInEnglish,
 				IsUser = false 
 			});
-		}
-	}
 
-	private async Task<ChatResponseModel> GetResponse(string message)
-	{
-		return await languageChatService.SendMessage(message);
+			isProcessing = false;
+		}
 	}
 
 	public class Message
