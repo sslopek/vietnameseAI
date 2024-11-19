@@ -56,7 +56,7 @@ namespace VietnameseAI
 					.Build();
 				return kernel;
 			});
-			builder.Services.AddSingleton<LanguageChatService>();
+			builder.Services.AddTransient<LanguageChatService>();
 			builder.Services.AddTransient<UserLearningDatabase>();
 			builder.Services.AddSingleton<SQLitePreferences>(sqlitePreferences);
 
