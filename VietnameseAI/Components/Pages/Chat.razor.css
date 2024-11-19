@@ -58,11 +58,5 @@ input {
 }
 
 button {
-    padding: 8px;
     margin-left: 5px;
-    border: none;
-    background-color: #c22f2f;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
 }
