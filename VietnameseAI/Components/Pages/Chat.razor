@@ -23,17 +23,17 @@
 			</div>
 		}
 	</div>
-	<div class="input-container">
-		<input @bind="userInput" @onkeypress="HandleKeyPress" placeholder="Type your message..." />
-		<button @onclick="SendMessage">Send</button>
-	</div>
+	<form @onsubmit="HandleSubmit" class="input-container">
+		<input @bind="userInput" placeholder="Type your message..." />
+		<button type="submit">Send</button>
+	</form>
 </div>
 
 @code {
 	private string userInput = string.Empty;
 	private List<Message> messages = new List<Message>();
 
-	private async Task SendMessage()
+	private async Task HandleSubmit()
 	{
 		if (!string.IsNullOrWhiteSpace(userInput))
 		{
@@ -54,14 +54,6 @@
 	private async Task<ChatResponseModel> GetResponse(string message)
 	{
 		return await languageChatService.SendMessage(message);
-	}
-
-	private async Task HandleKeyPress(KeyboardEventArgs e)
-	{
-		if (e.Key == "Enter")
-		{
-			await SendMessage();
-		}
 	}
 
 	public class Message
