@@ -54,12 +54,25 @@
 		{
 			isProcessing = true;
 
-			// Add user message to the chat
+			// Add placeholder user message to the chat
 			messages.Add(new ChatMessageViewModel { Text = userInput, IsUser = true });
 			var lastMessage = userInput;
 			userInput = string.Empty;
 
+			// Get results from service
 			var chatResult = await languageChatService.SendMessage(lastMessage);
+
+			// Replace user message placeholder with more details
+			messages.RemoveAt(messages.Count - 1);
+			messages.Add(new ChatMessageViewModel
+				{
+					Text = lastMessage,
+					Translation = chatResult.RequestVietnamese,
+					IsUser = true,
+					NewWordCount = chatResult.NewRequestWordCount
+				});
+
+			// Add reply
 			messages.Add(new ChatMessageViewModel
 				{
 					Text = chatResult.ResponseVietnamese,
