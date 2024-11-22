@@ -60,26 +60,37 @@
 			userInput = string.Empty;
 
 			// Get results from service
-			var chatResult = await languageChatService.SendMessage(lastMessage);
+			try
+			{
+				var chatResult = await languageChatService.SendMessage(lastMessage);
 
-			// Replace user message placeholder with more details
-			messages.RemoveAt(messages.Count - 1);
-			messages.Add(new ChatMessageViewModel
-				{
-					Text = lastMessage,
-					Translation = chatResult.RequestVietnamese,
-					IsUser = true,
-					NewWordCount = chatResult.NewRequestWordCount
-				});
+				// Replace user message placeholder with more details
+				messages.RemoveAt(messages.Count - 1);
+				messages.Add(new ChatMessageViewModel
+					{
+						Text = lastMessage,
+						Translation = chatResult.RequestVietnamese,
+						IsUser = true,
+						NewWordCount = chatResult.NewRequestWordCount
+					});
 
-			// Add reply
-			messages.Add(new ChatMessageViewModel
-				{
-					Text = chatResult.ResponseVietnamese,
-					Translation = chatResult.ResponseEnglish,
-					IsUser = false,
-					NewWordCount = chatResult.NewResponseWordCount
-				});
+				// Add reply
+				messages.Add(new ChatMessageViewModel
+					{
+						Text = chatResult.ResponseVietnamese,
+						Translation = chatResult.ResponseEnglish,
+						IsUser = false,
+						NewWordCount = chatResult.NewResponseWordCount
+					});
+			}
+			catch
+			{
+				messages.Add(new ChatMessageViewModel
+					{
+						Text = "Error - check your API key.",
+						IsUser = false
+					});
+			}
 
 			isProcessing = false;
 		}
