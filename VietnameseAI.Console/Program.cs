@@ -45,14 +45,14 @@ internal class Program
 
 			var responseModel = await chatService.SendMessage(userInput);
 
-			Console.WriteLine("AI: " + responseModel.AssistantResponseInVietnamese);
+			Console.WriteLine("AI: " + responseModel.ResponseVietnamese);
 			Console.ForegroundColor = ConsoleColor.DarkGray;
-			Console.WriteLine("AI (English): " + responseModel.AssistantResponseInEnglish);
-			Console.WriteLine();
-			foreach (var item in responseModel.AssistantResponseVietnameseWordList.Union(responseModel.UserMessageVietnameseWordList).OrderBy(x => x.VietnameseWord))
-			{
-				Console.WriteLine($"{item.VietnameseWord}: {item.EnglishTranslation}");
-			}
+			Console.WriteLine("AI (English): " + responseModel.ResponseEnglish);
+			//Console.WriteLine();
+			//foreach (var item in responseModel.AssistantResponseVietnameseWordList.Union(responseModel.UserMessageVietnameseWordList).OrderBy(x => x.VietnameseWord))
+			//{
+			//	Console.WriteLine($"{item.VietnameseWord}: {item.EnglishTranslation}");
+			//}
 			Console.ResetColor();
 		}
 	}

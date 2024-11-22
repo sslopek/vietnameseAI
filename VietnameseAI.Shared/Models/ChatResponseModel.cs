@@ -1,5 +1,8 @@
 ﻿namespace VietnameseAI.Shared.Models;
 
+/// <summary>
+/// Populated by OpenAI structured output - consider the property naming as part of the prompt.
+/// </summary>
 public class ChatResponseModel
 {
 	public string UserMessageInEnglish { get; set; } = string.Empty;

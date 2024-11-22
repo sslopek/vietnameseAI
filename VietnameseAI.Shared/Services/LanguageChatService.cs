@@ -39,7 +39,7 @@ public class LanguageChatService
 		};
 	}
 
-	public async Task<ChatResponseModel> SendMessage(string userMessage)
+	public async Task<ChatResult> SendMessage(string userMessage)
 	{
 		history.AddUserMessage(userMessage);
 
@@ -55,12 +55,22 @@ public class LanguageChatService
 		history.AddAssistantMessage(responseModel.AssistantResponseInEnglish);
 
 		// Save new words
+		int newRequestWords = 0;
+		int newResponseWords = 0;
 		foreach (var item in responseModel.AssistantResponseVietnameseWordList.Union(responseModel.UserMessageVietnameseWordList).OrderBy(x => x.VietnameseWord))
 		{
 			var wordRecord = await userLearningDatabase.GetItemAsync(item.VietnameseWord);
 
 			if (wordRecord == null)
 			{
+				if (responseModel.UserMessageVietnameseWordList.Any(x => x.VietnameseWord == item.VietnameseWord))
+				{
+					newRequestWords++;
+				}
+				else {
+					newResponseWords++;
+				}
+				
 				wordRecord = new DiscoveredWord
 				{
 					Word = item.VietnameseWord,
@@ -74,7 +84,14 @@ public class LanguageChatService
 
 			await userLearningDatabase.SaveItemAsync(wordRecord);
 		}
-		
-		return responseModel;
+
+		return new ChatResult
+		{
+			RequestVietnamese = responseModel.UserMessageInVietnamese,
+			ResponseVietnamese = responseModel.AssistantResponseInVietnamese,
+			ResponseEnglish = responseModel.AssistantResponseInEnglish,
+			NewRequestWordCount = newRequestWords,
+			NewResponseWordCount = newResponseWords,
+		};
 	}
 }

@@ -17,6 +17,10 @@
 						{
 							<div class="translated-spoiler">@message.Translation</div>
 						}
+						@if (@message.NewWordCount > 0)
+						{
+							<div class="new-words"><i class="bi bi-stars"></i> Discovered @message.NewWordCount new words!</div>
+						}
 					</p>
 
 				</div>
@@ -42,7 +46,7 @@
 @code {
 	private string userInput = string.Empty;
 	private bool isProcessing;
-	private List<Message> messages = new List<Message>();
+	private List<ChatMessageViewModel> messages = new List<ChatMessageViewModel>();
 
 	private async Task HandleSubmit()
 	{
@@ -51,25 +55,28 @@
 			isProcessing = true;
 
 			// Add user message to the chat
-			messages.Add(new Message { Text = userInput, IsUser = true });
+			messages.Add(new ChatMessageViewModel { Text = userInput, IsUser = true });
 			var lastMessage = userInput;
 			userInput = string.Empty;
 
-			var assistantResponse = await languageChatService.SendMessage(lastMessage);
-			messages.Add(new Message { 
-				Text = assistantResponse.AssistantResponseInVietnamese,
-				Translation = assistantResponse.AssistantResponseInEnglish,
-				IsUser = false 
-			});
+			var chatResult = await languageChatService.SendMessage(lastMessage);
+			messages.Add(new ChatMessageViewModel
+				{
+					Text = chatResult.ResponseVietnamese,
+					Translation = chatResult.ResponseEnglish,
+					IsUser = false,
+					NewWordCount = chatResult.NewResponseWordCount
+				});
 
 			isProcessing = false;
 		}
 	}
 
-	public class Message
+	public class ChatMessageViewModel
 	{
 		public string Text { get; set; } = string.Empty;
 		public string? Translation { get; set; }
 		public bool IsUser { get; set; }
+		public int NewWordCount { get; set; }
 	}
 }
