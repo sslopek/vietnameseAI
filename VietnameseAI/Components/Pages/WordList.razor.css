@@ -11,3 +11,7 @@
 .search-box {
     margin: 5px;
 }
+
+.grid {
+    overflow-x: auto;
+}
