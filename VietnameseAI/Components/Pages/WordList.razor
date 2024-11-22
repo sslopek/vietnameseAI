@@ -1,5 +1,7 @@
 ﻿@inject UserLearningDatabase userLearningDatabase
 @page "/wordList"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using VietnameseAI.Shared.Utilities
 
 <h1>Word List</h1>
 
@@ -11,33 +13,30 @@
 }
 else
 {
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Word</th>
-				<th>Definition</th>
-				<th>Times Seen</th>
-				<th>Added</th>
-				<th>Actions</th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach (var word in discoveredWords)
-			{
-				<tr>
-					<td>@word.Word</td>
-					<td>@word.Definition</td>
-					<td>@word.TimesDiscovered</td>
-					<td>@word.DiscoveredDate</td>
-					<td><button @onclick="@(e => HandleDelete(word))">Delete</button></td>
-				</tr>
-			}
-		</tbody>
-	</table>
-}
+	<div class="search-box">
+		<input type="search" autofocus @bind="wordFilter" @bind:event="oninput" placeholder="Search..." />
+	</div>
+	<div class="grid">
+		<QuickGrid Items="@filteredDiscoveredWords" Pagination="@pagination">
+			<PropertyColumn Property="@(c => c.Word)" Title="Vietnamese" Sortable="true" />
+			<PropertyColumn Property="@(c => c.Definition)" Title="English" Sortable="true" />
+			<PropertyColumn Property="@(c => c.TimesDiscovered)" Title="Times Seen" IsDefaultSortColumn="true" InitialSortDirection="SortDirection.Descending" Sortable="true" />
+			<PropertyColumn Property="@(c => c.DiscoveredDate)" Title="First Seen" Format="yyyy-MM-dd" Sortable="true" />
+			<PropertyColumn Property="@(c => c.LastSeenDate)" Title="Last Seen" Format="yyyy-MM-dd" Sortable="true" />
+			<TemplateColumn Title="Actions">
+				<button class="btn btn-sm btn-danger" @onclick="@(e => HandleDelete(context))">Delete</button>
+			</TemplateColumn>
+		</QuickGrid>
+	</div>
 
+	<Paginator State="@pagination" />
+}
 @code {
-	private List<DiscoveredWord>? discoveredWords;
+	IQueryable<DiscoveredWord>? discoveredWords;
+	IQueryable<DiscoveredWord>? filteredDiscoveredWords => discoveredWords?.Where(x => x.Word.ContainsIgnoringAccentsAndCase(wordFilter) || x.Definition.ContainsIgnoringAccentsAndCase(wordFilter));
+	PaginationState pagination = new PaginationState { ItemsPerPage = 25 };
+	string wordFilter = string.Empty;
+
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -52,6 +51,6 @@ else
 
 	private async Task ReloadList()
 	{
-		discoveredWords = await userLearningDatabase.GetDiscoveredWordsAsync();
+		discoveredWords = (await userLearningDatabase.GetDiscoveredWordsAsync()).AsQueryable();
 	}
 }

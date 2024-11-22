@@ -1,0 +1,13 @@
+﻿/* Stop the last page from collapsing to the number of rows on it */
+::deep tr {
+    height: 1.8rem;
+}
+
+    /* Subtle stripe effect */
+    ::deep tr:nth-child(even) {
+        background: rgba(255,255,255,0.5);
+    }
+
+.search-box {
+    margin: 5px;
+}
